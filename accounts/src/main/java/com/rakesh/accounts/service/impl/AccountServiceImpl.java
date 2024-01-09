@@ -40,7 +40,6 @@ public class AccountServiceImpl implements AccountServiceInterf {
           "Customer already registered with the given mobile number - "
               + customerDto.getMobileNumber());
     }
-    customer.setCreatedBy("Anonymous");
     Customer savedCustomer = customerRepository.save(customer);
     accountRepository.save(createNewAccount(savedCustomer));
   }
@@ -128,7 +127,6 @@ public class AccountServiceImpl implements AccountServiceInterf {
     newAccount.setAccountNumber(randomAccNumber);
     newAccount.setAccountType(AccountsConstants.SAVINGS);
     newAccount.setBranchAddress(AccountsConstants.ADDRESS);
-    newAccount.setCreatedBy("Anonymous");
     return newAccount;
   }
 }
