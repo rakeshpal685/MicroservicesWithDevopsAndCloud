@@ -2,9 +2,13 @@ package com.rakesh.accounts.controller;
 
 import com.rakesh.accounts.constants.AccountsConstants;
 import com.rakesh.accounts.dto.CustomerDto;
+import com.rakesh.accounts.dto.ErrorResponseDto;
 import com.rakesh.accounts.dto.ResponseDto;
 import com.rakesh.accounts.service.AccountServiceInterf;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.info.Contact;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -37,8 +41,14 @@ public class AccountsController {
   // Below are for swagger
   @Operation(
       summary = "Create Account REST API",
-      description = "REST API to create a new customer in the bank")
-  @ApiResponse(responseCode = "201", description = "HTTP status CREATED")
+      description = "REST API to create a new customer in the bank",
+      responses = {
+        @ApiResponse(responseCode = "201", description = "HTTP status CREATED"),
+        @ApiResponse(
+            responseCode = "500",
+            description = "HTTP status Internal Server Error",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+      })
   public ResponseEntity<ResponseDto> createAccount(@Valid @RequestBody CustomerDto customerDto) {
     accountServiceInterf.createAccount(customerDto);
     return ResponseEntity.status(HttpStatus.CREATED)
@@ -53,10 +63,13 @@ public class AccountsController {
       responses = {
         @ApiResponse(responseCode = "200", description = "HTTP status OK"),
         @ApiResponse(responseCode = "404", description = "HTTP status NOT_FOUND"),
+        @ApiResponse(
+            responseCode = "500",
+            description = "HTTP status Internal Server Error",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
       })
   public ResponseEntity<CustomerDto> fetchAccountDetails(
-      //      @RequestParam
-      @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
+      @RequestParam @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
           String mobileNumber) {
     CustomerDto customerDto = accountServiceInterf.fetchAccount(mobileNumber);
     return ResponseEntity.status(HttpStatus.OK).body(customerDto);
@@ -70,7 +83,13 @@ public class AccountsController {
       responses = {
         @ApiResponse(responseCode = "200", description = "HTTP status OK"),
         @ApiResponse(responseCode = "404", description = "HTTP status NOT_FOUND"),
-        @ApiResponse(responseCode = "500", description = "HTTP status Internal Server Error")
+        @ApiResponse(responseCode = "417", description = "Exception Failed"),
+        @ApiResponse(
+            responseCode = "500",
+            description = "HTTP status Internal Server Error",
+            /* Here I'm telling to spring that for these update operation, there is a good chance a 500 error can happen.
+            Whenever that 500 error happens, I'm going to send the ErrorResponse by following the schema defined inside this ErrorResponseDto.*/
+            content = @Content(schema = @Schema(implementation = ErrorResponseDto.class)))
       })
   public ResponseEntity<ResponseDto> updateAccountDetails(
       @Valid @RequestBody CustomerDto customerDto) {
@@ -79,8 +98,9 @@ public class AccountsController {
       return ResponseEntity.status(HttpStatus.OK)
           .body(new ResponseDto(AccountsConstants.STATUS_200, AccountsConstants.MESSAGE_200));
     } else {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(new ResponseDto(AccountsConstants.STATUS_500, AccountsConstants.MESSAGE_500));
+      return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+          .body(
+              new ResponseDto(AccountsConstants.STATUS_417, AccountsConstants.MESSAGE_417_UPDATE));
     }
   }
 
@@ -92,19 +112,23 @@ public class AccountsController {
       responses = {
         @ApiResponse(responseCode = "200", description = "HTTP status OK"),
         @ApiResponse(responseCode = "404", description = "HTTP status NOT_FOUND"),
-        @ApiResponse(responseCode = "500", description = "HTTP status Internal Server Error")
+        @ApiResponse(responseCode = "417", description = "Exception Failed"),
+        @ApiResponse(
+            responseCode = "500",
+            description = "HTTP status Internal Server Error",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
       })
   public ResponseEntity<ResponseDto> deleteAccountDetails(
-      //      @RequestParam
-      @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
+      @RequestParam @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
           String mobileNumber) {
     boolean isDeleted = accountServiceInterf.deleteAccount(mobileNumber);
     if (isDeleted) {
       return ResponseEntity.status(HttpStatus.OK)
           .body(new ResponseDto(AccountsConstants.STATUS_200, AccountsConstants.MESSAGE_200));
     } else {
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(new ResponseDto(AccountsConstants.STATUS_500, AccountsConstants.MESSAGE_500));
+      return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+          .body(
+              new ResponseDto(AccountsConstants.STATUS_417, AccountsConstants.MESSAGE_417_DELETE));
     }
   }
 }
