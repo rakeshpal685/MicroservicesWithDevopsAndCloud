@@ -15,9 +15,19 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+  #    This is to tell spring that we have two more profiles
+  config:
+    import:
+      - "application_qa.yml"
+      - "application_prod.yml"
+  #    This is to tell spring that active the below profile when loading
+  # so spring boot will check every property and see what properties are overridden the rest properties it will take from the default yml file
+  profiles:
+    active:
+      - "qa"
 
 build:
-  version: "1.0"
+  version: "3.0"
 
 accounts:
   message: "Welcome to Rakesh Bank accounts related local APIs "
