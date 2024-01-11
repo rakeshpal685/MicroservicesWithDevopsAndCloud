@@ -1,0 +1,12 @@
+
+build:
+  version: "10.0"
+
+loans:
+  message: "Welcome to Rakesh Bank loans related local APIs "
+  contactDetails:
+    name: "John Doe - Developer"
+    email: "john@rakeshbank.com"
+  onCallSupport:
+    - (555) 555-1234
+    - (555) 523-1345

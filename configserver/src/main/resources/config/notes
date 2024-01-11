@@ -1,0 +1,11 @@
+This folder is created so that we can keep our configurations in the classpath of the spring cloud
+config server.
+
+Here we have kept all the configurations of the microservices from all the environments.
+In our base yml file of the microservices, we will just define which is the active profile and
+the url of the configuration server, to read the activated profile's yml.
+
+Once the microservice is up, it will hit the url where config server is running and will search
+for the active profile yml in the classpath of the config server, once found it will inject the
+desired values based on the active profile
+

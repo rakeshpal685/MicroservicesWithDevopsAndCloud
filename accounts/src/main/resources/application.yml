@@ -2,6 +2,8 @@ server:
   port: 8080
 
 spring:
+  application:
+    name: "accounts"
   datasource:
     url: jdbc:h2:mem:testdb
     driverClassName: org.h2.Driver
@@ -15,25 +17,8 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
-  #    This is to tell spring that we have two more profiles
-  config:
-    import:
-      - "application_qa.yml"
-      - "application_prod.yml"
-  #    This is to tell spring that active the below profile when loading
-  # so spring boot will check every property and see what properties are overridden the rest properties it will take from the default yml file
   profiles:
-    active:
-      - "qa"
-
-build:
-  version: "3.0"
-
-accounts:
-  message: "Welcome to Rakesh Bank accounts related local APIs "
-  contactDetails:
-    name: "John Doe - Developer"
-    email: "john@rakeshbank.com"
-  onCallSupport:
-    - (555) 555-1234
-    - (555) 523-1345
+    active: "prod"
+  #    This tells springboot where is our config server located
+  config:
+    import: "optional:configserver:http://localhost:8071/"
