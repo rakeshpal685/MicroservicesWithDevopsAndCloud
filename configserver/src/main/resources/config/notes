@@ -9,3 +9,13 @@ Once the microservice is up, it will hit the url where config server is running 
 for the active profile yml in the classpath of the config server, once found it will inject the
 desired values based on the active profile
 
+Inside the yml file of the configServer, we have to specify what is the search location
+
+If we want to read the configuration from an external file then just remove all the yml from here and
+keep it inside a folder in your machine, then inside the application yml of the configServer define the
+below property
+  cloud:
+    config:
+      server:
+        native:
+          search-locations: "file:///C://Users//rakes//Downloads//configProperties"
