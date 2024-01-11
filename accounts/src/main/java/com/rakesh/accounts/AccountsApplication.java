@@ -1,5 +1,6 @@
 package com.rakesh.accounts;
 
+import com.rakesh.accounts.dto.AccountsContactInfoDto;
 import io.swagger.v3.oas.annotations.ExternalDocumentation;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.info.Contact;
@@ -7,11 +8,8 @@ import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.ComponentScans;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
-import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 /*If we are following the standard approach and creating the packages parallel to main class then spring
@@ -37,6 +35,8 @@ use the bean with the name auditAwareImpl to understand the current auditor.*/
         @ExternalDocumentation(
             description = "This is external documentation for further reference",
             url = "www.springboot.com"))
+/*This annotation tells spring to see the POJO class where we are mapping our properties from the yml file*/
+@EnableConfigurationProperties(value = {AccountsContactInfoDto.class})
 public class AccountsApplication {
 
   public static void main(String[] args) {
