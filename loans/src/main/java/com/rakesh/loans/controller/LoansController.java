@@ -2,6 +2,7 @@ package com.rakesh.loans.controller;
 
 import com.rakesh.loans.constants.LoansConstants;
 import com.rakesh.loans.dto.ErrorResponseDto;
+import com.rakesh.loans.dto.LoansContactInfoDto;
 import com.rakesh.loans.dto.LoansDto;
 import com.rakesh.loans.dto.ResponseDto;
 import com.rakesh.loans.service.ILoansService;
@@ -12,7 +13,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,11 +32,25 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping(
     path = "/api",
     produces = {MediaType.APPLICATION_JSON_VALUE})
-@AllArgsConstructor
+/* As we are using @Value to read a value from the yml file, and we are using constructor injection
+this will throw an error that it need a bean for the String buildVersion, We can resolve this by either
+manually creating a constructor or by using @Autowired over the declaration
+@AllArgsConstructor*/
 @Validated
 public class LoansController {
 
   private ILoansService iLoansService;
+
+  //  This is used to read the value from the property file
+  @Value("${build.version}")
+  private String buildVersion;
+
+  /*   We can use Environment also to read the value from the environment, this is alternative to
+  @Value*/
+  @Autowired private Environment environment;
+
+  /*We can use this as a replacement for @Value and Environment when we have a lot of properties to map*/
+  @Autowired private LoansContactInfoDto loansContactInfoDto;
 
   @Operation(
       summary = "Create Loan REST API",
@@ -118,5 +135,59 @@ public class LoansController {
       return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
           .body(new ResponseDto(LoansConstants.STATUS_417, LoansConstants.MESSAGE_417_DELETE));
     }
+  }
+
+  @Operation(
+      summary = "Get Build Information",
+      description = "REST API to get the build information",
+      responses = {
+        @ApiResponse(responseCode = "200", description = "HTTP status OK"),
+        @ApiResponse(responseCode = "404", description = "HTTP status NOT_FOUND"),
+        @ApiResponse(
+            responseCode = "500",
+            description = "HTTP status Internal Server Error",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+      })
+  @GetMapping("/build-info")
+  public ResponseEntity<String> getBuildInfo() {
+    return ResponseEntity.status(HttpStatus.OK).body(buildVersion);
+  }
+
+  @Operation(
+      summary = "Get path Information of the system using Environment variable",
+      description =
+          "REST API to get the information about path variables and processor detail stored in the system environment ",
+      responses = {
+        @ApiResponse(responseCode = "200", description = "HTTP status OK"),
+        @ApiResponse(responseCode = "404", description = "HTTP status NOT_FOUND"),
+        @ApiResponse(
+            responseCode = "500",
+            description = "HTTP status Internal Server Error",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+      })
+  @GetMapping("/java-version")
+  public ResponseEntity<String> getJavaInfo() {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(
+            environment.getProperty("path")
+                + " \nThe processor detail is "
+                + environment.getProperty("PROCESSOR_IDENTIFIER"));
+  }
+
+  @Operation(
+      summary = "Get the contact info from the properties.yml file",
+      description =
+          "REST API to get the contact information from the properties.yml using @EnableConfigurationProperties and Java class",
+      responses = {
+        @ApiResponse(responseCode = "200", description = "HTTP status OK"),
+        @ApiResponse(responseCode = "404", description = "HTTP status NOT_FOUND"),
+        @ApiResponse(
+            responseCode = "500",
+            description = "HTTP status Internal Server Error",
+            content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
+      })
+  @GetMapping("/contact-info")
+  public ResponseEntity<LoansContactInfoDto> getContactInfo() {
+    return ResponseEntity.status(HttpStatus.OK).body(loansContactInfoDto);
   }
 }

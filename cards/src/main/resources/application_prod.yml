@@ -1,0 +1,17 @@
+#Here we are telling spring, when to activate this yml file
+spring:
+  config:
+    activate:
+      on-profile: "prod"
+
+build:
+  version: "1.0"
+
+cards:
+  message: "Welcome to Rakesh Bank cards related prod APIs"
+  contactDetails:
+    name: "Rene copo- Product Owner"
+    email: "rene@rakeshbank.com"
+  onCallSupport:
+    - (453) 392-4829
+    - (236) 203-0384
