@@ -23,8 +23,16 @@ spring:
   #  When we do some configuration changes in github while our services are running, then to reflect those changes
   #  we have to enable actuator endpoints in the service and hit one specific endpoint called refresh
   #  eg:- http://localhost:9000/actuator/refresh is the endpoint for this service
+#  this is not a feasible option because lets say if we have many instances of our service then we have to refresh all
+#  the instances
   config:
     import: "optional:configserver:http://localhost:8071/"
+  rabbitmq:
+    host: "localhost"
+    port: 5672
+    stream:
+      username: "guest"
+      password: "guest"
 
 #This will enable all the endpoints given by the actuator
 management:

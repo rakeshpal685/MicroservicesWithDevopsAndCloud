@@ -19,9 +19,27 @@ spring:
     show-sql: true
   profiles:
     active: "prod"
-  #    This tells springboot where is our config server located
+    #    This tells springboot where is our config server located
+    #  When we do some configuration changes in github while our services are running, then to reflect those changes
+    #  we have to enable actuator endpoints in the service and hit one specific endpoint called refresh
+    #  eg:- http://localhost:9000/actuator/refresh is the endpoint for this service
+  #  this is not a feasible option because lets say if we have many instances of our service then we have to refresh all
+  #  the instances. hence we will use spring bus which uses rabbit mq like below
   config:
     import: "optional:configserver:http://localhost:8071/"
+  #Here we wanted to refresh all the instances of our service so that they can fetch the latest config file from github
+  #We can do it manually by hitting refresh endpoints of each service instances, but the better way is using spring cloud
+  #bus, run the rabbitmq (docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management),
+  #then add the dependency of cloud bus in pom.xml and add he below rabbitmq properties and
+  #invoke the busrefresh api given by actuator on any running service, this endpoint will fetch the latest config file
+  #for all the instances of all other services too, just that all other instances should also register on the same
+  #  rabbitmq
+  rabbitmq:
+    host: "localhost"
+    port: 5672
+    stream:
+      username: "guest"
+      password: "guest"
 
 #This will enable all the endpoints given by the actuator
 management:
