@@ -19,7 +19,17 @@ spring:
     show-sql: true
   profiles:
     active: "qa"
-  #    This tells springboot where is our config server located
+  #    This tells springboot where is our config server located,
+  #  When we do some configuration changes in github while our services are running, then to reflect those changes
+  #  we have to enable actuator endpoints in the service and hit one specific endpoint called refresh
+  #  eg:- http://localhost:9000/actuator/refresh is the endpoint for this service
   config:
     import: "optional:configserver:http://localhost:8071/"
+
+#This will enable all the endpoints given by the actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
 

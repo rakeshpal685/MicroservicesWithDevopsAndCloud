@@ -22,3 +22,10 @@ spring:
   #    This tells springboot where is our config server located
   config:
     import: "optional:configserver:http://localhost:8071/"
+
+#This will enable all the endpoints given by the actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

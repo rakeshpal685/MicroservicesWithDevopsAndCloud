@@ -5,10 +5,20 @@ spring:
   application:
     name: "configserver"
   profiles:
-    active: native
+    active: git
   cloud:
     config:
       server:
-        native:
-#          search-locations: "classpath:/config"
-          search-locations: "file:///C://Users//rakes//Downloads//configProperties"
+        git:
+          uri: "https://github.com/rakeshpal685/MicroservicesWithDevopconfigAndCloud.git"
+          default-label: "master"
+          timeout: 5
+          clone-on-start: true
+          force-pull: true
+#the encrpt key is used to encrypt our username and password and other things present in .properties file in the GIT
+#this key can be kept in vault, After giving the encrypted key here do a POST request to http://localhost:8071/encrypt
+#and give your username,password or anything you want to be encrypted as a body to get the encrypted value and paste the values in the git config file one by one
+#Use {cypher} in front of them so that my server can automatically decrypt the values while reading,
+#eg:- https://github.com/rakeshpal685/MicroservicesWithDevopconfigAndCloud/blob/master/accounts-prod.yml
+encrypt:
+  key: "45D81EC1EF61DF9AD8D3E5BB397F9"
