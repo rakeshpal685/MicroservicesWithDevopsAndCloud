@@ -29,8 +29,21 @@ spring:
 encrypt:
   key: "45D81EC1EF61DF9AD8D3E5BB397F9"
 
+
+#The liveness-state and readiness-state is used in docker container to check that whether the configserver container
+#is up and running or not before other containers are created which depends on the configserver
 management:
   endpoints:
     web:
       exposure:
         include: "*"
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
