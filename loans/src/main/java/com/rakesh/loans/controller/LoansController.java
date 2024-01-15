@@ -39,7 +39,11 @@ manually creating a constructor or by using @Autowired over the declaration
 @Validated
 public class LoansController {
 
-  private ILoansService iLoansService;
+  private final ILoansService iLoansService;
+
+  public LoansController(ILoansService iLoansService) {
+    this.iLoansService = iLoansService;
+  }
 
   //  This is used to read the value from the property file
   @Value("${build.version}")

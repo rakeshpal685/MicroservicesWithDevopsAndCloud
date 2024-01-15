@@ -15,11 +15,11 @@ spring:
           timeout: 5
           clone-on-start: true
           force-pull: true
-  rabbitmq:
-    host: "localhost"
-    port: 5672
-    username: "guest"
-    password: "guest"
+#  rabbitmq:
+#    host: "localhost"
+#    port: 5672
+#    username: "guest"
+#    password: "guest"
 
 #the encrypt key is used to encrypt our username and password and other things present in .properties file in the GIT
 #this key can be kept in vault, After giving the encrypted key here do a POST request to http://localhost:8071/encrypt

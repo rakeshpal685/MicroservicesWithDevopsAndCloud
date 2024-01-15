@@ -4,21 +4,17 @@ server:
 spring:
   application:
     name: "accounts"
-  datasource:
-    url: jdbc:h2:mem:testdb
-    driverClassName: org.h2.Driver
-    username: sa
-    password: ''
-  h2:
-    console:
-      enabled: true
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: update
-    show-sql: true
   profiles:
     active: "prod"
+  datasource:
+    url: jdbc:mysql://localhost:3307/accountsdb
+    username: root
+    password: password
+  jpa:
+    show-sql: true
+  sql:
+    init:
+      mode: always
     #    This tells springboot where is our config server located
     #  When we do some configuration changes in github while our services are running, then to reflect those changes
     #  we have to enable actuator endpoints in the service and hit one specific endpoint called refresh
@@ -34,14 +30,14 @@ spring:
   #invoke the busrefresh api given by actuator on any running service, this endpoint will fetch the latest config file
   #for all the instances of all other services too, just that all other instances should also register on the same
   #  rabbitmq
-  rabbitmq:
-    host: "localhost"
-    port: 5672
-    stream:
-      username: "guest"
-      password: "guest"
+  #  rabbitmq:
+  #    host: "localhost"
+  #    port: 5672
+  #    stream:
+  #      username: "guest"
+  #      password: "guest"
 
-#This will enable all the endpoints given by the actuator
+  #This will enable all the endpoints given by the actuator
 management:
   endpoints:
     web:
