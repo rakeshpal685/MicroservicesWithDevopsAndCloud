@@ -9,7 +9,7 @@ import com.rakesh.accounts.exception.CustomerAlreadyExistsException;
 import com.rakesh.accounts.exception.ResourceNotFoundException;
 import com.rakesh.accounts.mapper.AccountsMapper;
 import com.rakesh.accounts.mapper.CustomerMapper;
-import com.rakesh.accounts.repository.AccountRepository;
+import com.rakesh.accounts.repository.AccountsRepository;
 import com.rakesh.accounts.repository.CustomerRepository;
 import com.rakesh.accounts.service.AccountServiceInterf;
 import java.util.Optional;
@@ -21,7 +21,7 @@ import org.springframework.stereotype.Service;
 @AllArgsConstructor
 public class AccountServiceImpl implements AccountServiceInterf {
 
-  private AccountRepository accountRepository;
+  private AccountsRepository accountRepository;
   private CustomerRepository customerRepository;
 
   /**
@@ -60,7 +60,7 @@ public class AccountServiceImpl implements AccountServiceInterf {
                     new ResourceNotFoundException(
                         "Account", "customerId", customer.getCustomerId().toString()));
 
-    CustomerDto customerDto = CustomerMapper.mapTeCustomerDto(customer, new CustomerDto());
+    CustomerDto customerDto = CustomerMapper.mapToCustomerDto(customer, new CustomerDto());
     customerDto.setAccountsDto(AccountsMapper.mapToAccountsDto(accounts, new AccountsDto()));
 
     return customerDto;

@@ -206,4 +206,6 @@ public class AccountsController {
   public ResponseEntity<AccountsContactInfoDto> getContactInfo() {
     return ResponseEntity.status(HttpStatus.OK).body(accountsContactInfoDto);
   }
+
+
 }

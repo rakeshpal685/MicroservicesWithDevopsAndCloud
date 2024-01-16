@@ -23,6 +23,8 @@ services:
       - 3307:3306
     environment:
       MYSQL_DATABASE: accountsdb
+    #      Here we are extending the base yml file which have the common properties, we have to tell the
+    #      file name which act as a base file and in that file which particular service to extend
     extends:
       file: common-config.yml
       service: microservice-db-config
@@ -49,7 +51,7 @@ services:
 
 
   configserver:
-    image: "rakeshpal/configserver:s7"
+    image: "rakeshpal/configserver:s8"
     container_name: configserver-ms
     ports:
       - "8071:8071"
@@ -65,8 +67,27 @@ services:
       service: microservice-base-config
 
 
+  eurekaserver:
+    image: "rakeshpal/eurekaserver:s8"
+    container_name: eurekaserver-ms
+    ports:
+      - "8070:8070"
+    #  This will run he below command to check whether my configserver is started or not
+    healthcheck:
+      test: "curl --fail --silent localhost:8070/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-config.yml
+      service: microservice-configserver-config
+    environment:
+      SPRING_APPLICATION_NAME: "eurekaserver"
+
+
   accounts:
-    image: "rakeshpal/accounts:s7"
+    image: "rakeshpal/accounts:s8"
     container_name: accounts-ms
     ports:
       - "8080:8080"
@@ -78,11 +99,11 @@ services:
         condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eureka-config
 
 
   loans:
-    image: "rakeshpal/loans:s7"
+    image: "rakeshpal/loans:s8"
     container_name: loans-ms
     ports:
       - "8090:8090"
@@ -94,11 +115,11 @@ services:
         condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eureka-config
 
 
   cards:
-    image: "rakeshpal/cards:s7"
+    image: "rakeshpal/cards:s8"
     container_name: cards-ms
     ports:
       - "9000:9000"
@@ -110,7 +131,7 @@ services:
         condition: service_healthy
     extends:
       file: common-config.yml
-      service: microservice-configserver-config
+      service: microservice-eureka-config
 
 
 

@@ -1,0 +1,43 @@
+spring:
+  application:
+    name: "eurekaserver"
+
+
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    readinessstate:
+      enabled: true
+    livenessstate:
+      enabled: true
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+
+eureka:
+  instance:
+    #    Indicates the frequency the client sends heartbeats to server to indicate that it is still alive
+    lease-renewal-interval-in-seconds: 30
+    #    Indicates the duration the server waits since it received the last heartbeat before it can evict an instance
+    lease-expiration-duration-in-seconds: 90
+  server:
+    #    A scheduler(EvictionTask) is run at this frequency which will evict instances from the registry if the lease of the instances are
+    #    expired as configured by lease-expiration-duration-in-seconds. It will also check whether the system has reached self-preservation
+    #    mode (by comparing actual and expected heartbeats) before evicting.
+    eviction-interval-timer-in-ms: 6000
+    #    This value is used to calculate the expected % of heartbeats per minute eureka is expecting.
+    renewal-percent-threshold: 0.85
+    #    A scheduler is run at this frequency which calculates the expected heartbeats per minute
+    renewal-threshold-update-interval-ms: 90000
+    #    By default, self-preservation mode is enabled but if you need to disable it you can change it to ʻfalseʼ
+    enable-self-preservation: true
+

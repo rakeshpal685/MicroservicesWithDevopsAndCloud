@@ -1,11 +1,12 @@
 package com.rakesh.accounts.mapper;
 
+import com.rakesh.accounts.dto.CustomerDetailsDto;
 import com.rakesh.accounts.dto.CustomerDto;
 import com.rakesh.accounts.entity.Customer;
 
 public class CustomerMapper {
 
-  public static CustomerDto mapTeCustomerDto(Customer customer, CustomerDto customerDto) {
+  public static CustomerDto mapToCustomerDto(Customer customer, CustomerDto customerDto) {
     customerDto.setName(customer.getName());
     customerDto.setEmail(customer.getEmail());
     customerDto.setMobileNumber(customer.getMobileNumber());
@@ -17,5 +18,13 @@ public class CustomerMapper {
     customer.setEmail(customerDto.getEmail());
     customer.setMobileNumber(customerDto.getMobileNumber());
     return customer;
+  }
+
+  public static CustomerDetailsDto mapToCustomerDetailsDto(
+      Customer customer, CustomerDetailsDto customerDetailsDto) {
+    customerDetailsDto.setName(customer.getName());
+    customerDetailsDto.setEmail(customer.getEmail());
+    customerDetailsDto.setMobileNumber(customer.getMobileNumber());
+    return customerDetailsDto;
   }
 }

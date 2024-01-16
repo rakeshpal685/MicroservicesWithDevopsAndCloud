@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Modifying;
 
 import java.util.Optional;
 
-public interface AccountRepository extends JpaRepository<Accounts, Long> {
+public interface AccountsRepository extends JpaRepository<Accounts, Long> {
 
   Optional<Accounts> findByCustomerId(Long customerId);
 

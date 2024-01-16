@@ -4,6 +4,8 @@ server:
 spring:
   application:
     name: "cards"
+  profiles:
+    active: "qa"
   datasource:
     url: jdbc:mysql://localhost:3309/cardsdb
     username: root
@@ -13,14 +15,12 @@ spring:
   sql:
     init:
       mode: always
-  profiles:
-    active: "qa"
   #    This tells springboot where is our config server located,
   #  When we do some configuration changes in github while our services are running, then to reflect those changes
   #  we have to enable actuator endpoints in the service and hit one specific endpoint called refresh
   #  eg:- http://localhost:9000/actuator/refresh is the endpoint for this service
-#  this is not a feasible option because lets say if we have many instances of our service then we have to refresh all
-#  the instances
+  #  this is not a feasible option because lets say if we have many instances of our service then we have to refresh all
+  #  the instances
   config:
     import: "optional:configserver:http://localhost:8071/"
 #  rabbitmq:
@@ -36,4 +36,32 @@ management:
     web:
       exposure:
         include: "*"
+  endpoint:
+    shutdown:
+      enabled: true
+  info:
+    env:
+      enabled: true
 
+
+endpoints:
+  shutdown:
+    enabled: true
+
+
+eureka:
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 10
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8070/eureka/
+
+#This info will be shown on the eureka dashboard for this service
+info:
+  app:
+    name: "cards"
+    description: "Rakesh Bank Cards Application"
+    version: "1.0.0"
