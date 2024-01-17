@@ -9,14 +9,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.constraints.Pattern;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Tag(
     name = "REST API for Customers in Rakesh Bank",
@@ -26,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
     path = "/api",
     produces = {MediaType.APPLICATION_JSON_VALUE})
 @Validated
+@Log4j2
 public class CustomerController {
   private final CustomerServiceInterface customerServiceInterface;
 
@@ -46,10 +45,15 @@ public class CustomerController {
       })
   @GetMapping("/fetchCustomerDetails")
   public ResponseEntity<CustomerDetailsDto> fetchCustomerDetails(
+      /*With this, this REST API will have access to the request header that is being sent by my gateway server.
+       * Which we can use in the logger and will see that during the API call whether the same
+       * correlationId is travelling or not, this is helpful during debug*/
+      @RequestHeader("eazybank-correlation-id") String correlationId,
       @RequestParam @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
           String mobileNumber) {
+    log.debug("eazyBank-correlation-id found:{}", correlationId);
     CustomerDetailsDto customerDetailsDto =
-        customerServiceInterface.fetchCustomerDetails(mobileNumber);
+        customerServiceInterface.fetchCustomerDetails(mobileNumber, correlationId);
     return ResponseEntity.status(HttpStatus.OK).body(customerDetailsDto);
   }
 }

@@ -13,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -39,11 +41,8 @@ manually creating a constructor or by using @Autowired over the declaration
 @Validated
 public class LoansController {
 
+  private static final Logger logger = LoggerFactory.getLogger(LoansController.class);
   private final ILoansService iLoansService;
-
-  public LoansController(ILoansService iLoansService) {
-    this.iLoansService = iLoansService;
-  }
 
   //  This is used to read the value from the property file
   @Value("${build.version}")
@@ -52,9 +51,12 @@ public class LoansController {
   /*   We can use Environment also to read the value from the environment, this is alternative to
   @Value*/
   @Autowired private Environment environment;
-
   /*We can use this as a replacement for @Value and Environment when we have a lot of properties to map*/
   @Autowired private LoansContactInfoDto loansContactInfoDto;
+
+  public LoansController(ILoansService iLoansService) {
+    this.iLoansService = iLoansService;
+  }
 
   @Operation(
       summary = "Create Loan REST API",
@@ -87,8 +89,10 @@ public class LoansController {
       })
   @GetMapping("/fetch")
   public ResponseEntity<LoansDto> fetchLoanDetails(
+      @RequestHeader("eazybank-correlation-id") String correlationId,
       @RequestParam @Pattern(regexp = "(^$|[0-9]{10})", message = "Mobile number must be 10 digits")
           String mobileNumber) {
+    logger.debug("eazyBank-correlation-id found:{}", correlationId);
     LoansDto loansDto = iLoansService.fetchLoan(mobileNumber);
     return ResponseEntity.status(HttpStatus.OK).body(loansDto);
   }

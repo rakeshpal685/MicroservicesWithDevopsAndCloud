@@ -1,0 +1,52 @@
+spring:
+  application:
+    name: "gatewayserver"
+    #    This tells springboot where is our config server located
+    #  When we do some configuration changes in github while our services are running, then to reflect those changes
+    #  we have to enable actuator endpoints in the service and hit one specific endpoint called refresh
+    #  eg:- http://localhost:PORT/actuator/refresh is the endpoint for this service
+  #  this is not a feasible option because lets say if we have many instances of our service then we have to refresh all
+  #  the instances. hence we will use spring bus which uses rabbit mq like below
+  config:
+    import: "optional:configserver:http://localhost:8071/"
+
+  #This is to tell the gateway that connect to the eureka and get all the details about the
+  #registered microservices, so that the request from the external client is passed on to the
+  #appropriate service, lowercaseServiceId defines to accept the service name in completely lowercase,
+  #  it is useful when our registered services has capital letters and our routing url has small case letters
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lowerCaseServiceId: true
+
+
+  #This will enable all the endpoints given by the actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    gateway:
+      enabled: true
+  info:
+    env:
+      enabled: true
+
+
+#This info will be shown on the eureka dashboard for this service
+info:
+  app:
+    name: "gatewayserver"
+    description: "Rakesh Bank Gateway Server Application"
+    version: "1.0.0"
+
+
+
+logging:
+  level:
+    com:
+      rakesh:
+        gatewayserver: DEBUG

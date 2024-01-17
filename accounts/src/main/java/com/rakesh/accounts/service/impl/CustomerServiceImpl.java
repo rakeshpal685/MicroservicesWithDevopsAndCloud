@@ -28,11 +28,13 @@ public class CustomerServiceImpl implements CustomerServiceInterface {
   private LoansFeignClient loansFeignClient;
 
   /**
-   * @param mobileNumber- Input Mobile Number
+   * @param mobileNumber - Input Mobile Number
+   * @param correlationId - This id is generated from the gateway server,and coming here by the
+   *     CustomerController which can be used to trace the logs
    * @return Customer Details based on the given Mobile Number
    */
   @Override
-  public CustomerDetailsDto fetchCustomerDetails(String mobileNumber) {
+  public CustomerDetailsDto fetchCustomerDetails(String mobileNumber, String correlationId) {
     Customer customer =
         customerRepository
             .findByMobileNumber(mobileNumber)
@@ -52,11 +54,11 @@ public class CustomerServiceImpl implements CustomerServiceInterface {
     customerDetailsDto.setAccountsDto(AccountsMapper.mapToAccountsDto(accounts, new AccountsDto()));
 
     ResponseEntity<LoansDto> loansDtoResponseEntity =
-        loansFeignClient.fetchLoanDetails(mobileNumber);
+        loansFeignClient.fetchLoanDetails(correlationId,mobileNumber);
     customerDetailsDto.setLoansDto(loansDtoResponseEntity.getBody());
 
     ResponseEntity<CardsDto> cardsDtoResponseEntity =
-        cardsFeignClient.fetchCardDetails(mobileNumber);
+        cardsFeignClient.fetchCardDetails(correlationId,mobileNumber);
     customerDetailsDto.setCardsDto(cardsDtoResponseEntity.getBody());
 
     return customerDetailsDto;
