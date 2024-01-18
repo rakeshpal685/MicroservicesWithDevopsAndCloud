@@ -5,7 +5,7 @@ spring:
     #  When we do some configuration changes in github while our services are running, then to reflect those changes
     #  we have to enable actuator endpoints in the service and hit one specific endpoint called refresh
     #  eg:- http://localhost:PORT/actuator/refresh is the endpoint for this service
-  #  this is not a feasible option because lets say if we have many instances of our service then we have to refresh all
+  #  this is not a feasible option because let's say if we have many instances of our service then we have to refresh all
   #  the instances. hence we will use spring bus which uses rabbit mq like below
   config:
     import: "optional:configserver:http://localhost:8071/"
@@ -20,9 +20,23 @@ spring:
         locator:
           enabled: false
           lowerCaseServiceId: true
-
+      #This httpclient property is given so that after the specified time our circuit breaker will trigger, if we don't provide
+      #this there is already a default value present inside circuit breaker, we can change the values for each service individually
+      httpclient:
+        #ConnectionTimeout defines how much time my current service is taking to connect to the end service
+        connect-timeout: 1000
+        #Response timeout defines how much time is taken by the end service to respond to the request
+        response-timeout: 2s
+  #This is for redis which we are using in ratelimiter pattern for resilience purposes
+  data:
+    redis:
+      connect-timeout: 2s
+      host: localhost
+      port: 6379
+      timeout: 1s
 
   #This will enable all the endpoints given by the actuator
+
 management:
   endpoints:
     web:
@@ -50,3 +64,19 @@ logging:
     com:
       rakesh:
         gatewayserver: DEBUG
+
+
+#This circuit breaker properties will be applicable to all the circuit breakers, if we want to
+#apply individual properties to the circuit breaker then instead of default we have to use the
+#circuit breaker name that we have defined in our Gatewayserver main class
+
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        sliding-window-size: 10
+        permitted-number-of-calls-in-half-open-state: 2
+        failure-rate-threshold: 50
+        wait-duration-in-open-state:
+          seconds: 10
+

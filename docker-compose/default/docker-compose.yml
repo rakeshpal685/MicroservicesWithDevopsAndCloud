@@ -17,6 +17,19 @@ services:
   #      file: common-config.yml
   #      service: network-deploy-service
 
+  #  This redis is for testing Rate limiter pattern in spring cloud gateway for resilience
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD-SHELL", "redis-cli ping | grep PONG" ]
+      timeout: 10s
+      retries: 10
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
   accountsdb:
     container_name: accountsdb
     ports:
@@ -51,7 +64,7 @@ services:
 
 
   configserver:
-    image: "rakeshpal/configserver:s9"
+    image: "rakeshpal/configserver:s10"
     container_name: configserver-ms
     ports:
       - "8071:8071"
@@ -68,7 +81,7 @@ services:
 
 
   eurekaserver:
-    image: "rakeshpal/eurekaserver:s9"
+    image: "rakeshpal/eurekaserver:s10"
     container_name: eurekaserver-ms
     ports:
       - "8070:8070"
@@ -87,7 +100,7 @@ services:
 
 
   gatewayservice:
-    image: "rakeshpal/gatewayserver:s9"
+    image: "rakeshpal/gatewayserver:s10"
     container_name: gatewayserver-ms
     ports:
       - "8072:8072"
@@ -96,12 +109,18 @@ services:
         condition: service_healthy
       loans:
         condition: service_healthy
-      loans1:
-        condition: service_healthy
+#      loans1:
+#        condition: service_healthy
       cards:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     environment:
       SPRING_APPLICATION_NAME: "gatewayserver"
+      SPRING_DATA_REDIS_CONNECT-TIMEOUT: 2s
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_TIMEOUT: 1s
     extends:
       file: common-config.yml
       service: microservice-eureka-config
@@ -109,7 +128,7 @@ services:
 
 
   accounts:
-    image: "rakeshpal/accounts:s9"
+    image: "rakeshpal/accounts:s10"
     container_name: accounts-ms
     ports:
       - "8080:8080"
@@ -131,7 +150,7 @@ services:
 
 
   loans:
-    image: "rakeshpal/loans:s9"
+    image: "rakeshpal/loans:s10"
     container_name: loans-ms
     ports:
       - "8090:8090"
@@ -152,29 +171,29 @@ services:
       service: microservice-eureka-config
 
   #This is for second instance of loans
-  loans1:
-    image: "rakeshpal/loans:s9"
-    container_name: loans-ms1
-    ports:
-      - "8091:8090"
-    healthcheck:
-      test: "curl --fail --silent localhost:8091/actuator/health/readiness | grep UP || exit 1"
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    environment:
-      SPRING_APPLICATION_NAME: "loans"
-      SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
-    depends_on:
-      loansdb:
-        condition: service_healthy
-    extends:
-      file: common-config.yml
-      service: microservice-eureka-config
+  #  loans1:
+  #    image: "rakeshpal/loans:s10"
+  #    container_name: loans-ms1
+  #    ports:
+  #      - "8091:8090"
+  #    healthcheck:
+  #      test: "curl --fail --silent localhost:8091/actuator/health/readiness | grep UP || exit 1"
+  #      interval: 10s
+  #      timeout: 5s
+  #      retries: 10
+  #      start_period: 10s
+  #    environment:
+  #      SPRING_APPLICATION_NAME: "loans"
+  #      SPRING_DATASOURCE_URL: "jdbc:mysql://loansdb:3306/loansdb"
+  #    depends_on:
+  #      loansdb:
+  #        condition: service_healthy
+  #    extends:
+  #      file: common-config.yml
+  #      service: microservice-eureka-config
 
   cards:
-    image: "rakeshpal/cards:s9"
+    image: "rakeshpal/cards:s10"
     container_name: cards-ms
     ports:
       - "9000:9000"

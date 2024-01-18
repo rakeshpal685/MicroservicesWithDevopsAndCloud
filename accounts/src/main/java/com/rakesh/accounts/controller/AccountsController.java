@@ -6,6 +6,8 @@ import com.rakesh.accounts.dto.CustomerDto;
 import com.rakesh.accounts.dto.ErrorResponseDto;
 import com.rakesh.accounts.dto.ResponseDto;
 import com.rakesh.accounts.service.AccountServiceInterf;
+import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
+import io.github.resilience4j.retry.annotation.Retry;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,6 +15,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Pattern;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
@@ -23,6 +26,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@Log4j2
 @RequestMapping(
     value = "/api",
     produces = {MediaType.APPLICATION_JSON_VALUE})
@@ -164,9 +168,22 @@ public class AccountsController {
             description = "HTTP status Internal Server Error",
             content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
       })
+  /*This is used to implement the Retry pattern for resilience, even after the total number of retries attempted, if there is no output
+   then the fallback method will be called, we can use the name that we have defined in yml file in place of default to configure
+  individual properties of each retry pattern*/
+  @Retry(name = "getBuildInfo", fallbackMethod = "getBuildInfoFallback")
   @GetMapping("/build-info")
   public ResponseEntity<String> getBuildInfo() {
+    log.debug("getBuildInfo() method Invoked");
     return ResponseEntity.status(HttpStatus.OK).body(buildVersion);
+  }
+
+  /*This is a fallback method for getBuildInfo method in case of Retry pattern for resilience, The fallback method should have the same return type and parameters
+  as the parent method alone with an extra parameter of type Throwable.
+   * */
+  public ResponseEntity<String> getBuildInfoFallback(Throwable throwable) {
+    log.debug("Fallback method against /build-info api is called from AccountsController");
+    return ResponseEntity.status(HttpStatus.OK).body("0.9");
   }
 
   @Operation(
@@ -181,6 +198,9 @@ public class AccountsController {
             description = "HTTP status Internal Server Error",
             content = @Content(schema = @Schema(implementation = ErrorResponseDto.class))),
       })
+  /*This is used to implement the RateLimiter pattern for resilience, If the number of calls that we have defined in the yml
+   * exceeds then the given fallback method will be called*/
+  @RateLimiter(name = "getJavaInfo", fallbackMethod = "getJavaInfoFallback")
   @GetMapping("/java-version")
   public ResponseEntity<String> getJavaInfo() {
     return ResponseEntity.status(HttpStatus.OK)
@@ -188,6 +208,12 @@ public class AccountsController {
             environment.getProperty("path")
                 + " \nThe processor detail is "
                 + environment.getProperty("PROCESSOR_IDENTIFIER"));
+  }
+
+  /*This is a fallback method for getJavaInfo method in case of RateLimiter pattern, The fallback method should have the same
+  return type and parameters as the parent method alone with an extra parameter of type Throwable. */
+  public ResponseEntity<String> getJavaInfoFallback(Throwable throwable) {
+    return ResponseEntity.status(HttpStatus.OK).body("type java --version on terminal to check the version");
   }
 
   @Operation(
@@ -206,6 +232,4 @@ public class AccountsController {
   public ResponseEntity<AccountsContactInfoDto> getContactInfo() {
     return ResponseEntity.status(HttpStatus.OK).body(accountsContactInfoDto);
   }
-
-
 }

@@ -27,12 +27,20 @@ public class ResponseTraceFilter {
                   () -> {
                     HttpHeaders requestHeaders = exchange.getRequest().getHeaders();
                     String correlationId = filterUtility.getCorrelationId(requestHeaders);
-                    logger.debug(
-                        "Updated the correlation id to the outbound headers: {}", correlationId);
-                    exchange
+                    /* Here we are doing a check whether our Response header already contains the given key or not,
+                     * this is because we have implemented retry pattern circuit breaker, hence it will get the response header everytime
+                     * it hits the URl during retry, hence we have kept  this check  */
+                    if (!(exchange
                         .getResponse()
                         .getHeaders()
-                        .add(filterUtility.CORRELATION_ID, correlationId);
+                        .containsKey(filterUtility.CORRELATION_ID))) {
+                      logger.debug(
+                          "Updated the correlation id to the outbound headers: {}", correlationId);
+                      exchange
+                          .getResponse()
+                          .getHeaders()
+                          .add(filterUtility.CORRELATION_ID, correlationId);
+                    }
                   }));
     };
   }

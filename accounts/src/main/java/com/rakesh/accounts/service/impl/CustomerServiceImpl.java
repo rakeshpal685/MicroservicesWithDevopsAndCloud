@@ -12,8 +12,8 @@ import com.rakesh.accounts.mapper.CustomerMapper;
 import com.rakesh.accounts.repository.AccountsRepository;
 import com.rakesh.accounts.repository.CustomerRepository;
 import com.rakesh.accounts.service.CustomerServiceInterface;
-import com.rakesh.accounts.service.client.CardsFeignClient;
-import com.rakesh.accounts.service.client.LoansFeignClient;
+import com.rakesh.accounts.service.feignClient.CardsFeignClient;
+import com.rakesh.accounts.service.feignClient.LoansFeignClient;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -54,13 +54,16 @@ public class CustomerServiceImpl implements CustomerServiceInterface {
     customerDetailsDto.setAccountsDto(AccountsMapper.mapToAccountsDto(accounts, new AccountsDto()));
 
     ResponseEntity<LoansDto> loansDtoResponseEntity =
-        loansFeignClient.fetchLoanDetails(correlationId,mobileNumber);
-    customerDetailsDto.setLoansDto(loansDtoResponseEntity.getBody());
+        loansFeignClient.fetchLoanDetails(correlationId, mobileNumber);
+    if (null != loansDtoResponseEntity) {
+      customerDetailsDto.setLoansDto(loansDtoResponseEntity.getBody());
+    }
 
     ResponseEntity<CardsDto> cardsDtoResponseEntity =
-        cardsFeignClient.fetchCardDetails(correlationId,mobileNumber);
-    customerDetailsDto.setCardsDto(cardsDtoResponseEntity.getBody());
-
+        cardsFeignClient.fetchCardDetails(correlationId, mobileNumber);
+    if (null != cardsDtoResponseEntity) {
+      customerDetailsDto.setCardsDto(cardsDtoResponseEntity.getBody());
+    }
     return customerDetailsDto;
   }
 }

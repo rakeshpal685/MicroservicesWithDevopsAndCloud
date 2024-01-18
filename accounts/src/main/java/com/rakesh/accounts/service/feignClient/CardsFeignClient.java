@@ -1,4 +1,4 @@
-package com.rakesh.accounts.service.client;
+package com.rakesh.accounts.service.feignClient;
 
 import com.rakesh.accounts.dto.CardsDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /*This interface is created so that we can communicate with the cards microservice from our service,
-Here we have to give the same name that is used by the end service to register in eureka */
-@FeignClient("cards")
+Here we have to give the same name that is used by the end service to register in eureka.
+We are providing a fallback class here which will provide a different response if in case our end class is not responding*/
+
+@FeignClient(name = "cards", fallback = CardsFallback.class)
 public interface CardsFeignClient {
 
   /*Whatever methods we declare here should exactly match with the end service method that we
