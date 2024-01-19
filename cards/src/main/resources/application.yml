@@ -50,6 +50,12 @@ management:
   info:
     env:
       enabled: true
+  #  With the help of this property we are telling to the micrometer and Prometheus, please group all my metrics related to the
+  #  accounts microservice under the application name, which is cards. This is going to help you to identify the metrics of
+  #  each of the microservice. Otherwise, you cannot really identify which metrics belongs to which microservice.
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 
 endpoints:

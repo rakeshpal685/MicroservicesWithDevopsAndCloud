@@ -48,7 +48,9 @@ management:
   info:
     env:
       enabled: true
-
+  metrics:
+    tags:
+      application: ${spring.application.name}
 
 #This info will be shown on the eureka dashboard for this service
 info:
