@@ -67,7 +67,7 @@
 				<version>3.4.0</version>
 				<configuration>
 					<to>
-						<image>rakeshpal/${project.artifactId}:s10</image>
+						<image>rakeshpal/${project.artifactId}:s11</image>
 					</to>
 				</configuration>
 			</plugin>

@@ -26,7 +26,7 @@ spring:
         #ConnectionTimeout defines how much time my current service is taking to connect to the end service
         connect-timeout: 1000
         #Response timeout defines how much time is taken by the end service to respond to the request
-        response-timeout: 2s
+        response-timeout: 10s
   #This is for redis which we are using in ratelimiter pattern for resilience purposes
   data:
     redis:
