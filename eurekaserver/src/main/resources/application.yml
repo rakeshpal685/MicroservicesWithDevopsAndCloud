@@ -43,3 +43,11 @@ eureka:
     #    By default, self-preservation mode is enabled but if you need to disable it you can change it to ʻfalseʼ
     enable-self-preservation: true
 
+
+logging:
+  level:
+    com:
+      rakesh:
+        eurekaserver: DEBUG
+  pattern:
+    level: "%5p [${spring.application.name},%X{trace_id},%X{span_id}]"
