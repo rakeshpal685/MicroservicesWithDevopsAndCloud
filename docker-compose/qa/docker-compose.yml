@@ -64,7 +64,7 @@ services:
 
 
   configserver:
-    image: "rakeshpal/configserver:s11"
+    image: "rakeshpal/configserver:s12"
     container_name: configserver-ms
     ports:
       - "8071:8071"
@@ -83,7 +83,7 @@ services:
 
 
   eurekaserver:
-    image: "rakeshpal/eurekaserver:s11"
+    image: "rakeshpal/eurekaserver:s12"
     container_name: eurekaserver-ms
     ports:
       - "8070:8070"
@@ -102,8 +102,8 @@ services:
       OTEL_SERVICE_NAME: "eurekaserver"
 
 
-  gatewayservice:
-    image: "rakeshpal/gatewayserver:s11"
+  gatewayserver:
+    image: "rakeshpal/gatewayserver:s12"
     container_name: gatewayserver-ms
     ports:
       - "8072:8072"
@@ -121,6 +121,7 @@ services:
     environment:
       SPRING_APPLICATION_NAME: "gatewayserver"
       OTEL_SERVICE_NAME: "gatewayserver"
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK-SET-URI: "http://keycloak:8080/realms/master/protocol/openid-connect/certs"
     #      SPRING_DATA_REDIS_CONNECT-TIMEOUT: 2s
     #      SPRING_DATA_REDIS_HOST: redis
     #      SPRING_DATA_REDIS_PORT: 6379
@@ -132,10 +133,11 @@ services:
 
 
   accounts:
-    image: "rakeshpal/accounts:s11"
+    image: "rakeshpal/accounts:s12"
     container_name: accounts-ms
-    ports:
-      - "8080:8080"
+    #    As I have implemented gateway, now all the services should be accessed through gateway only, noone should access them directly
+    #    ports:
+    #      - "8080:8080"
     healthcheck:
       test: "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"
       interval: 20s
@@ -155,10 +157,11 @@ services:
 
 
   loans:
-    image: "rakeshpal/loans:s11"
+    image: "rakeshpal/loans:s12"
     container_name: loans-ms
-    ports:
-      - "8090:8090"
+    #    As I have implemented gateway, now all the services should be accessed through gateway only, noone should access them directly
+    #    ports:
+    #      - "8090:8090"
     healthcheck:
       test: "curl --fail --silent localhost:8090/actuator/health/readiness | grep UP || exit 1"
       interval: 20s
@@ -178,7 +181,7 @@ services:
 
   #This is for second instance of loans
   #  loans1:
-  #    image: "rakeshpal/loans:s11"
+  #    image: "rakeshpal/loans:s12"
   #    container_name: loans-ms1
   #    ports:
   #      - "8091:8090"
@@ -199,10 +202,11 @@ services:
   #      service: microservice-eureka-config
 
   cards:
-    image: "rakeshpal/cards:s11"
+    image: "rakeshpal/cards:s12"
     container_name: cards-ms
-    ports:
-      - "9000:9000"
+    #    As I have implemented gateway, now all the services should be accessed through gateway only, noone should access them directly
+    #    ports:
+    #      - "9000:9000"
     healthcheck:
       test: "curl --fail --silent localhost:9000/actuator/health/readiness | grep UP || exit 1"
       interval: 20s
@@ -420,7 +424,18 @@ services:
       file: common-config.yml
       service: network-deploy-service
 
-
+  keycloak:
+    image: quay.io/keycloak/keycloak:22.0.1
+    container_name: keycloak
+    ports:
+      - "7080:8080"
+    environment:
+      KEYCLOAK_ADMIN: "admin"
+      KEYCLOAK_ADMIN_PASSWORD: "admin"
+    command: "start-dev"
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
 
 #Here we are creating a network and assigning the same to all our services so that they become the part of the
 #same network and can communicate with each other

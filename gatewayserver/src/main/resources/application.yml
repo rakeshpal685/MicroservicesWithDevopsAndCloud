@@ -35,8 +35,21 @@ spring:
       port: 6379
       timeout: 1s
 
-  #This will enable all the endpoints given by the actuator
+  #This is for the keycloak configuration,this is the server url using which my resource server can download the certificates
+  #  during the startup of this resource server application.
+  #  It is going to connect with the resource server and it is going to download a public certificate from#
+  #  the Keycloak server. So what is the purpose of this public certificate? Using this public certificate,
+  #  my resource server can validate if a given access token is really issued by the Keycloak server.
+  #  If yes, is it a valid access token or an invalid access token? So all those checks on the access token,
+  #  it can perform with the help of this public certificate.
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: "http://localhost:7080/realms/master/protocol/openid-connect/certs"
 
+
+  #This will enable all the endpoints given by the actuator
 management:
   endpoints:
     web:
@@ -82,4 +95,3 @@ resilience4j:
         failure-rate-threshold: 50
         wait-duration-in-open-state:
           seconds: 10
-
