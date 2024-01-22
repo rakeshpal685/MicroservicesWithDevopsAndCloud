@@ -1,21 +1,21 @@
 #This compose file can be kept anywhere in the system
 
 services:
-  #  rabbit:
-  #    image: rabbitmq:3.12-management
-  #    hostname: rabbitmq
-  #    ports:
-  #      - "5672:5672"
-  #      - "15672:15672"
-  #    healthcheck:
-  #      test: rabbitmq-diagnostics check_port_connectivity
-  #      interval: 10s
-  #      timeout: 5s
-  #      retries: 10
-  #      start_period: 5s
-  #    extends:
-  #      file: common-config.yml
-  #      service: network-deploy-service
+  rabbit:
+    image: rabbitmq:3.12-management
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    healthcheck:
+      test: rabbitmq-diagnostics check_port_connectivity
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
 
   #  #  This redis is for Rate limiter pattern in spring cloud gateway for resilience
   #  redis:
@@ -64,7 +64,7 @@ services:
 
 
   configserver:
-    image: "rakeshpal/configserver:s12"
+    image: "rakeshpal/configserver:s13"
     container_name: configserver-ms
     ports:
       - "8071:8071"
@@ -83,7 +83,7 @@ services:
 
 
   eurekaserver:
-    image: "rakeshpal/eurekaserver:s12"
+    image: "rakeshpal/eurekaserver:s13"
     container_name: eurekaserver-ms
     ports:
       - "8070:8070"
@@ -103,7 +103,7 @@ services:
 
 
   gatewayserver:
-    image: "rakeshpal/gatewayserver:s12"
+    image: "rakeshpal/gatewayserver:s13"
     container_name: gatewayserver-ms
     ports:
       - "8072:8072"
@@ -133,7 +133,7 @@ services:
 
 
   accounts:
-    image: "rakeshpal/accounts:s12"
+    image: "rakeshpal/accounts:s13"
     container_name: accounts-ms
     #    As I have implemented gateway, now all the services should be accessed through gateway only, noone should access them directly
     #    ports:
@@ -148,8 +148,11 @@ services:
       SPRING_APPLICATION_NAME: "accounts"
       SPRING_DATASOURCE_URL: "jdbc:mysql://accountsdb:3306/accountsdb"
       OTEL_SERVICE_NAME: "accounts"
+      SPRING_RABBITMQ_HOST: "rabbit"
     depends_on:
       accountsdb:
+        condition: service_healthy
+      rabbit:
         condition: service_healthy
     extends:
       file: common-config.yml
@@ -157,7 +160,7 @@ services:
 
 
   loans:
-    image: "rakeshpal/loans:s12"
+    image: "rakeshpal/loans:s13"
     container_name: loans-ms
     #    As I have implemented gateway, now all the services should be accessed through gateway only, noone should access them directly
     #    ports:
@@ -181,7 +184,7 @@ services:
 
   #This is for second instance of loans
   #  loans1:
-  #    image: "rakeshpal/loans:s12"
+  #    image: "rakeshpal/loans:s13"
   #    container_name: loans-ms1
   #    ports:
   #      - "8091:8090"
@@ -202,7 +205,7 @@ services:
   #      service: microservice-eureka-config
 
   cards:
-    image: "rakeshpal/cards:s12"
+    image: "rakeshpal/cards:s13"
     container_name: cards-ms
     #    As I have implemented gateway, now all the services should be accessed through gateway only, noone should access them directly
     #    ports:
@@ -436,6 +439,21 @@ services:
     extends:
       file: common-config.yml
       service: network-deploy-service
+
+
+  message:
+    image: "rakeshpal/message:s13"
+    container_name: message-ms
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    environment:
+      SPRING_RABBITMQ_HOST: "rabbit"
+    extends:
+      file: common-config.yml
+      service: network-deploy-service
+
+
 
 #Here we are creating a network and assigning the same to all our services so that they become the part of the
 #same network and can communicate with each other

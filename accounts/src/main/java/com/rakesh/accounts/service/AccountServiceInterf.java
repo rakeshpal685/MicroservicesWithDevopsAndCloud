@@ -14,4 +14,14 @@ public interface AccountServiceInterf {
   boolean updateAccount(CustomerDto customerDto);
 
   boolean deleteAccount(String mobileNumber);
+
+  /**
+   *
+   * @param accountNumber - Long
+   * @return boolean indicating if the update of communication status is successful or not
+   * This is for RabbitMQ streams
+   */
+  boolean updateCommunicationStatus(Long accountNumber);
+
 }
+

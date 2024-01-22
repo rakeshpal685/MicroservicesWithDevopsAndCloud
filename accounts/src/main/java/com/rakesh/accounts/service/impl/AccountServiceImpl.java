@@ -2,6 +2,7 @@ package com.rakesh.accounts.service.impl;
 
 import com.rakesh.accounts.constants.AccountsConstants;
 import com.rakesh.accounts.dto.AccountsDto;
+import com.rakesh.accounts.dto.AccountsMsgDto;
 import com.rakesh.accounts.dto.CustomerDto;
 import com.rakesh.accounts.entity.Accounts;
 import com.rakesh.accounts.entity.Customer;
@@ -15,12 +16,17 @@ import com.rakesh.accounts.service.AccountServiceInterf;
 import java.util.Optional;
 import java.util.Random;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
+@Log4j2
 public class AccountServiceImpl implements AccountServiceInterf {
 
+  //  This is for RabbitMQ streams
+  private final StreamBridge streamBridge;
   private AccountsRepository accountRepository;
   private CustomerRepository customerRepository;
 
@@ -41,7 +47,8 @@ public class AccountServiceImpl implements AccountServiceInterf {
               + customerDto.getMobileNumber());
     }
     Customer savedCustomer = customerRepository.save(customer);
-    accountRepository.save(createNewAccount(savedCustomer));
+    Accounts savedAccount = accountRepository.save(createNewAccount(savedCustomer));
+    sendCommunication(savedAccount, savedCustomer);
   }
 
   @Override
@@ -128,5 +135,41 @@ public class AccountServiceImpl implements AccountServiceInterf {
     newAccount.setAccountType(AccountsConstants.SAVINGS);
     newAccount.setBranchAddress(AccountsConstants.ADDRESS);
     return newAccount;
+  }
+
+  // This method is created to send message to RabbitMQ
+  private void sendCommunication(Accounts account, Customer customer) {
+    var accountsMsgDto =
+        new AccountsMsgDto(
+            account.getAccountNumber(),
+            customer.getName(),
+            customer.getEmail(),
+            customer.getMobileNumber());
+    log.info("Sending Communication request for the details: {}", accountsMsgDto);
+    var result = streamBridge.send("sendCommunication-out-0", accountsMsgDto);
+    log.info("Is the Communication request successfully triggered ? : {}", result);
+  }
+
+  /**
+   * @param accountNumber - Long
+   * @return boolean indicating if the update of communication status is successful or not This
+   *     method is created to receive message from RabbitMQ and update the DB table
+   */
+  @Override
+  public boolean updateCommunicationStatus(Long accountNumber) {
+    boolean isUpdated = false;
+    if (accountNumber != null) {
+      Accounts accounts =
+          accountRepository
+              .findById(accountNumber)
+              .orElseThrow(
+                  () ->
+                      new ResourceNotFoundException(
+                          "Account", "AccountNumber", accountNumber.toString()));
+      accounts.setCommunicationSw(true);
+      accountRepository.save(accounts);
+      isUpdated = true;
+    }
+    return isUpdated;
   }
 }
