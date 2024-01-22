@@ -34,8 +34,14 @@ spring:
     function:
       definition: updateCommunication
     #This is for RabbitMQ/Kafka messaging using streams
+    #spring.cloud.stream.bindings.input/output.binder=kafka, this is written because we are using RabbitMQ for spring-cloud-starter-bus-amqp
+    #Hence there will be an issue that which stream provider to inject at runtime, hence we are clarifying that
     stream:
       bindings:
+        input:
+          binder: kafka
+        output:
+          binder: kafka
         updateCommunication-in-0:
           destination: communication-sent
           group: ${spring.application.name}
@@ -43,20 +49,20 @@ spring:
           destination: send-communication
 
 
-    #Here we wanted to refresh all the instances of our service so that they can fetch the latest config file from GitHub
-    #We can do it manually by hitting refresh endpoints of each service instances, but the better way is using spring cloud
-    #bus, run the rabbitmq (docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management),
-    #then add the dependency of cloud bus in pom.xml and add he below rabbitmq properties and
-    #invoke the busrefresh api given by actuator on any running service, this endpoint will fetch the latest config file
-    #for all the instances of all other services too, just that all other instances should also register on the same
-    #rabbitmq.
-    #    This is also used for RabbitMQ streams
-#  rabbitmq:
-#    host: "localhost"
-#    port: 5672
-#    username: "guest"
-#    password: "guest"
-#    connection-timeout: 10s
+      #Here we wanted to refresh all the instances of our service so that they can fetch the latest config file from GitHub
+      #We can do it manually by hitting refresh endpoints of each service instances, but the better way is using spring cloud
+      #bus, run the rabbitmq (docker run -it --rm --name rabbitmq -p 5672:5672 -p 15672:15672 rabbitmq:3.12-management),
+      #then add the dependency of cloud bus in pom.xml and add he below rabbitmq properties and
+      #invoke the busrefresh api given by actuator on any running service, this endpoint will fetch the latest config file
+      #for all the instances of all other services too, just that all other instances should also register on the same
+      #rabbitmq.
+      #    This is also used for RabbitMQ streams
+      #  rabbitmq:
+      #    host: "localhost"
+      #    port: 5672
+      #    username: "guest"
+      #    password: "guest"
+      #    connection-timeout: 10s
       kafka:
         binder:
           brokers:
